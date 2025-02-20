@@ -131,10 +131,49 @@ class PoseDetector:
         cv2.destroyAllWindows()
         print(f"坐标数据已保存到文件夹: {output_dir}")
 
+    def export_frames(self, video_path, frame_numbers):
+        # 检查文件是否存在
+        if not os.path.exists(video_path):
+            print(f"Error: 视频文件不存在: {video_path}")
+            return
+            
+        # 尝试打开视频文件
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"Error: 无法打开视频文件: {video_path}")
+            print("可能的原因：")
+            print("1. 视频文件格式不受支持")
+            print("2. 视频文件可能已损坏")
+            print("3. 缺少必要的视频解码器")
+            return
+
+        # 创建输出文件夹
+        output_dir = os.path.join(os.path.dirname(video_path), 'selected_frames')
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        frame_count = 0
+        while cap.isOpened():
+            success, frame = cap.read()
+            if not success:
+                break
+
+            if frame_count in frame_numbers:
+                # 保存图片
+                output_path = os.path.join(output_dir, f'frame_{frame_count}.jpg')
+                cv2.imwrite(output_path, frame)
+                print(f"已保存第 {frame_count} 帧到: {output_path}")
+
+            frame_count += 1
+
+        cap.release()
+        print(f"所有指定帧的图片已保存到文件夹: {output_dir}")
+
 def main():
     detector = PoseDetector()
-    video_path = input("请输入视频文件路径: ")
-    detector.process_video(video_path)
+    # 指定要导出的帧号
+    frame_numbers = [33, 53, 103, 104, 177, 178, 194, 197, 207, 208, 209, 211, 214, 215, 218, 221, 229, 231, 232, 233, 338, 372, 373, 389, 399, 403, 404, 407, 408, 409, 415, 420, 523, 525, 526, 527, 528, 553, 554, 565, 572, 603, 606, 607, 608, 609, 621, 625, 630, 631, 638, 659, 662, 686, 687, 688, 838]
+    detector.export_frames('1.mp4', frame_numbers)
 
 if __name__ == "__main__":
     main()
